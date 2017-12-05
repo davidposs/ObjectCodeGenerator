@@ -1,3 +1,11 @@
+/******************************************************************************
+* File:		Syntax.cpp
+* Authors:	David Poss, Douglas Galm
+*
+* Usage:	implements methods defined in Syntax.h
+*
+******************************************************************************/
+
 //TODO:
 // when non terminal symbols accepted
 // print out token and lexeme
@@ -10,6 +18,7 @@
 
 int line_count = 1;
 
+/* Writes to results file. Probably could be implemented better if time permits */
 void printHelper::write(std::string message) {
 	std::fstream fileWriter;
 	fileWriter.open(this->filename, std::ios::out | std::ios::app);
@@ -17,17 +26,27 @@ void printHelper::write(std::string message) {
 	fileWriter.close();
 }
 
-void retError(std::list<Pair>& lexemes) {
+void generateInstruction(std::string inst, printHelper printer) {
+	static std::string filename = "object-code.txt";
+	printer.filename = filename;
+	printer.write(inst);
+}
+
+
+/* Prints out which line an error occurred on, if any */
+void retError() {
 	std::cout << "\n\n\nError on line: " << line_count << std::endl;
 }
 
 /* Gets token at the top of the list */
 std::string getCurrentToken(std::list<Pair>& lexemes) {
 	if (lexemes.size() == 0) return "";
+
 	std::string token = lexemes.front().getToken();
 	while (token == "\\n" || token == "\\t")
 	{
-		if (token == "\\n") { line_count++; }
+		if (token == "\\n") line_count++;
+
 		lexemes.pop_front();
 		token = lexemes.front().getToken();
 	}
@@ -42,9 +61,9 @@ std::string getCurrentToken(std::list<Pair>& lexemes) {
 /* Gets the token+type pair at the top of the list */
 Pair getPair(std::list<Pair> lexemes) {
 	if (lexemes.size() == 0) return Pair("", "");
+
 	std::string token = lexemes.front().getToken();
-	while (token == "\\n" || token == "\\t")
-	{
+	while (token == "\\n" || token == "\\t") {
 		lexemes.pop_front();
 		token = lexemes.front().getToken();
 	}
@@ -54,7 +73,7 @@ Pair getPair(std::list<Pair> lexemes) {
 	return Pair(token, type);
 }
 
-
+/* Shows front of the lexemes list, used for debugging */
 void showTop(std::string fn, std::list<Pair>& lexemes) {
 	std::cout << fn << " " << lexemes.front().getToken() << std::endl;
 }
@@ -63,9 +82,7 @@ bool functionA(std::list<Pair> lexemes, printHelper printer) {
 	printer.write("<Rat17F>\n");
 	std::string token;
 	Pair temp = getPair(lexemes);
-	if (printer.print) {
-		printer.write("A-> B %% CD\n");
-	}
+	if (printer.print) printer.write("A-> B %% CD\n");
 
 	if (functionB(lexemes, printer)) {
 		token = getCurrentToken(lexemes);
@@ -76,124 +93,44 @@ bool functionA(std::list<Pair> lexemes, printHelper printer) {
 				if (functionD(lexemes, printer)) {
 					std::cout << "\n\nCorrectly parsed!\n";
 				}
-				else { retError(lexemes); return false; }
+				else { retError(); return false; }
 			}
-			else { retError(lexemes); return false; }
+			else { retError(); return false; }
 		}
 		else {
 			lexemes.push_front(temp);
-			retError(lexemes); return false;
+			retError(); return false;
 		}
 	}
-	else { retError(lexemes); return false; }
+	else { retError(); return false; }
 	return true;
 }
 
-//TRYING SOMETHING OUT
-/*bool functionB(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("B-> E | E'\n");
-	}
-	if (functionE(lexemes, printer)) {
-		//printer.write("Created Optional Function Definition\n\n\n");
-		return true;
-	}
-	else if (functionEprime(printer)) {
-		//printer.write("Created Optional Function Definition\n\n\n");
-		return true;
-	}
-	return false;
-}*/
-
 bool functionB(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("B-> E | E'\n");
-	}
-	if (functionE(lexemes, printer) || functionEprime(printer)) {
-		return true;
-	}
-	return false;
-}
+	if (printer.print) printer.write("B-> E | E'\n");
 
-//TRYING SOMETHING OUT
-/*bool functionE(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("E-> F | FE \n"); }
-	if (functionF(lexemes, printer)) {
-		if (functionE(lexemes, printer)) {
-			return true;
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
-}*/
+	return (functionE(lexemes, printer) || functionEprime(printer));
+}
 
 bool functionE(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("E-> F | FE \n");
-	}
+	if (printer.print) printer.write("E-> F | FE \n");
+	
 	if (functionF(lexemes, printer)) {
-		if (functionE2(lexemes, printer)) {
-			return true;
-		}
-	}
-	else {
-		return false;
-	}
-}
-
-
-bool functionE2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("E2 -> E' | E");
-	}
-	if (functionE(lexemes, printer) || functionEprime(printer)) {
-		return true;
+		if (functionE2(lexemes, printer)) return true;
+		else return true;
 	}
 	else return false;
 }
 
+bool functionE2(std::list<Pair>& lexemes, printHelper printer) {
+	if (printer.print) printer.write("E2 -> E' | E");
 
-/*OLD FUNCTION
-bool functionF(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("F-> @ G (H) C I\n");
-	}
-	Pair temp = getPair(lexemes);
-	std::string token = getCurrentToken(lexemes);
-	if (token == "@") {
-		if (functionG(lexemes, printer)) {
-			token = getCurrentToken(lexemes);
-			if (token == "(") {
-				if (functionH(lexemes, printer)) {
-					token = getCurrentToken(lexemes);
-					if (token == ")") {
-						if (functionC(lexemes, printer)) {
-							return functionI(lexemes, printer);
-						}
-					}
-					else {
-						lexemes.push_front(temp);
-					}
-				}
-			}
-			else {
-				lexemes.push_front(temp);
-			}
-		}
-	}
-	else {
-		lexemes.push_front(temp);
-	}
-	// F did not follow @ G (H) C I pattern
-	return false;
-}*/
+	return (functionE(lexemes, printer) || functionEprime(printer));
+}
 
 bool functionF(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("F-> @ G (H) C I\n");
-	}
+	if (printer.print) printer.write("F-> @ G (H) C I\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "@") {
@@ -230,19 +167,9 @@ bool functionF(std::list<Pair>& lexemes, printHelper printer) {
 	return false;
 }
 
-/*OLD FUNCTION
 bool functionH(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("H-> J | E' \n"); }
-	if (functionJ(lexemes, printer)) { return true; }
-	// chanhged to return functionEprime from just calling it
-	else { return functionEprime(printer); }
-}
-*/
+	if (printer.print) printer.write("H-> J | E' \n");
 
-bool functionH(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("H-> J | E' \n");
-	}
 	if (functionJ(lexemes, printer) || functionEprime(printer)) {
 		return true;
 	}
@@ -250,7 +177,8 @@ bool functionH(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionJ(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("J-> K | K, J \n"); }
+	if (printer.print) printer.write("J-> K | K, J \n");
+
 	if (functionK(lexemes, printer)) {
 		Pair temp = getPair(lexemes);
 		std::string token = getCurrentToken(lexemes);
@@ -265,39 +193,10 @@ bool functionJ(std::list<Pair>& lexemes, printHelper printer) {
 	}
 	return false;
 }
-/*
-bool functionJ(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("J -> KJ2\n");
-	}
-	if (functionK(lexemes, printer)) {
-		if (functionJ2(lexemes, printer)) {
-			return true;
-		}
-		else return false;
-	}
-	else return false;
-}
-
-bool functionJ2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("J2 -> E' | , J\n");
-	}
-	std::string token = getCurrentToken(lexemes);
-	if (token == ",") {
-		if (functionJ(lexemes, printer)) {
-			return true;
-		}
-		return true;
-	}
-	return true;
-}*/
-
 
 bool functionK(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("K-> L:M\n");
-	}
+	if (printer.print) printer.write("K-> L:M\n");
+
 	Pair temp = getPair(lexemes);
 	if (functionL(lexemes, printer)) {
 		std::string token = getCurrentToken(lexemes);
@@ -320,9 +219,8 @@ bool functionK(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionM(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("M-> integer | boolean | floating\n");
-	}
+	if (printer.print) printer.write("M-> integer | boolean | floating\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if ((token == "integer")
@@ -338,9 +236,8 @@ bool functionM(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionI(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("I->{ D }\n");
-	}
+	if (printer.print) printer.write("I->{ D }\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "{") {
@@ -366,53 +263,17 @@ bool functionI(std::list<Pair>&lexemes, printHelper printer) {
 	}
 }
 
-/*OLD FUNCTION
-bool functionC(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("C->N | E' \n"); }
-	if (functionN(lexemes, printer)) {
-		//printer.write("returning from N is true " << std::endl;
-		return true;
-	}
-	else {
-		//printer.write("N did not pass in C " << std::endl;
-		return functionEprime(printer);
-	}
-}
-*/
-
 bool functionC(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("C-> N | E\n");
-	}
+	if (printer.print) printer.write("C-> N | E\n");
+
 	if (functionN(lexemes, printer) || functionEprime(printer)) {
 		return true;
 	}
 }
 
-/*OLD FUNCTION
-bool functionN(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("N-> O; | O;N\n");
-	}
-	Pair temp = getPair(lexemes);
-	if (functionO(lexemes, printer)) {
-		std::string token = getCurrentToken(lexemes);
-		if (token == ");") {
-			if (functionN(lexemes, printer)) { return true; }
-			else { return true; }
-		}
-		else {
-			lexemes.push_front(temp);
-			return false;
-		}
-	}
-	return false;
-}
-*/
 bool functionN(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("N-> O\n");
-	}
+	if (printer.print) printer.write("N-> O\n");
+
 	if (functionO(lexemes, printer)) {
 		Pair temp = getPair(lexemes);
 		std::string token = getCurrentToken(lexemes);
@@ -431,18 +292,16 @@ bool functionN(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionN2(std::list<Pair>& lexmes, printHelper printer) {
-	if (printer.print) {
-		printer.write("N | E'\n");
-	}
+	if (printer.print) printer.write("N | E'\n");
+
 	if (functionN(lexmes, printer) || functionEprime(printer)) {
 		return true;
 	}
 }
 
 bool functionO(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("0-> ML\n");
-	}
+	if (printer.print) printer.write("0-> ML\n");
+
 	if (functionM(lexemes, printer)) {
 		if (functionL(lexemes, printer)) {
 			return true;
@@ -454,9 +313,8 @@ bool functionO(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionL(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("L->G | G, L\n");
-	}
+	if (printer.print) printer.write("L->G | G, L\n");
+
 	std::string token;
 	if (functionG(lexemes, printer)) {
 		Pair temp = getPair(lexemes);
@@ -479,60 +337,9 @@ bool functionL(std::list<Pair>& lexemes, printHelper printer) {
 	return true;
 }
 
-/*
-bool functionL(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("L-> G | G, L\n");
-	}
-	if (functionG(lexemes, printer)) {
-		if (functionL2(lexemes, printer)) {
-			return true;
-		}
-	}
-	else return true;
-}
-
-
-bool functionL2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("L -> G , L2\n");
-	}
-	std::string token = getCurrentToken(lexemes);
-	Pair temp = getPair(lexemes);
-	if (token == ",") {
-		if (functionL(lexemes, printer)) {
-			return true;
-		}
-	}
-	else {
-		lexemes.push_front(temp);
-		return false;
-	}
-	return true;
-}*/
-
-/*OLD FUNCTION
-bool functionD(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("D-> P | P D\n");
-	}
-	if (functionP(lexemes, printer)) {
-		//showTop("D", lexemes);
-		if (functionD(lexemes, printer)) {
-			return true;
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
-
-}*/
-
 bool functionD(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("D-> P D2\n");
-	}
+	if (printer.print) printer.write("D-> P D2\n");
+
 	if (functionP(lexemes, printer)) {
 		if (functionD2(lexemes, printer)) {
 			return true;
@@ -543,18 +350,16 @@ bool functionD(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionD2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("D2-> D | E\n");
-	}
+	if (printer.print) printer.write("D2-> D | E\n");
+
 	if (functionD(lexemes, printer) || functionEprime(printer)) {
 		return true;
 	}
 }
 
 bool functionP(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("P-> Q | R | S | T | U | V | W\n");
-	}
+	if (printer.print) printer.write("P-> Q | R | S | T | U | V | W\n");
+
 	if (functionQ(lexemes, printer)) { return true; }
 	if (functionR(lexemes, printer)) { return true; }
 	if (functionS(lexemes, printer)) { return true; }
@@ -566,9 +371,8 @@ bool functionP(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionQ(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("Q-> { D }\n");
-	}
+	if (printer.print) printer.write("Q-> { D }\n");
+
 	std::string token;
 	Pair temp = getPair(lexemes);
 	token = getCurrentToken(lexemes);
@@ -597,9 +401,8 @@ bool functionQ(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionR(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("R->G := X\n");
-	}
+	if (printer.print) printer.write("R->G := X\n");
+
 	std::string token;
 	Pair temp = getPair(lexemes);
 	if (functionG(lexemes, printer)) {
@@ -629,9 +432,8 @@ bool functionR(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionS(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("S-> if ( Y ) P S'\n");
-	}
+	if (printer.print) printer.write("S-> if ( Y ) P S'\n");
+
 	std::string token;
 	Pair temp = getPair(lexemes);
 	token = getCurrentToken(lexemes);
@@ -670,7 +472,8 @@ bool functionS(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionSprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Sprime -> fi | else P fi\n"); }
+	if (printer.print) printer.write("Sprime -> fi | else P fi\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "fi") {
@@ -700,9 +503,8 @@ bool functionSprime(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionT(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("T-> return T'\n");
-	}
+	if (printer.print) printer.write("T-> return T'\n");
+
 	std::string token;
 	Pair temp = getPair(lexemes);
 	token = getCurrentToken(lexemes);
@@ -721,7 +523,8 @@ bool functionT(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionTprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Tprime-> ; | X;\n"); }
+	if (printer.print) printer.write("Tprime-> ; | X;\n"); 
+
 	Pair temp = getPair(lexemes);
 	if (functionX(lexemes, printer)) {
 		std::string token = getCurrentToken(lexemes);
@@ -747,7 +550,8 @@ bool functionTprime(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionU(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("U-> write ( X );\n"); }
+	if (printer.print) printer.write("U-> write ( X );\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "write") {
@@ -791,7 +595,8 @@ bool functionU(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionV(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("V-> read ( L ); \n"); }
+	if (printer.print) printer.write("V-> read ( L ); \n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "read") {
@@ -836,7 +641,8 @@ bool functionV(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionW(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("W-> while ( Y ) P\n"); }
+	if (printer.print) printer.write("W-> while ( Y ) P\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "while") {
@@ -873,7 +679,8 @@ bool functionW(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionY(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Y-> X Z X\n"); }
+	if (printer.print) printer.write("Y-> X Z X\n");
+
 	if (functionX(lexemes, printer)) {
 		if (functionZ(lexemes, printer)) {
 			if (functionX(lexemes, printer)) { 
@@ -887,9 +694,8 @@ bool functionY(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionZ(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { 
-		printer.write("Z-> = | /= | > | < | => | <=\n"); 
-	}
+	if (printer.print) printer.write("Z-> = | /= | > | < | => | <=\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 
@@ -903,24 +709,10 @@ bool functionZ(std::list<Pair>&lexemes, printHelper printer) {
 		return false;
 	}
 }
-/*OLD FUNCTION
-bool functionX(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("X-> A' | A'X'\n"); }
-	if (functionAprime(lexemes, printer)) {
-		if (functionXprime(lexemes, printer)) {
-			return true;
-		}
-		else {
-			return true;
-		}
-	}
-	else {
-		return false;
-	}
-}*/
 
 bool functionX(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("X-> A' | A'X'\n"); }
+	if (printer.print) printer.write("X-> A' | A'X'\n");
+
 	if (functionAprime(lexemes, printer)) {
 		if (functionX2(lexemes, printer)) {
 			return true;
@@ -931,9 +723,8 @@ bool functionX(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionX2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) {
-		printer.write("X2 --> X' | E'\n");
-	}
+	if (printer.print) printer.write("X2 --> X' | E'\n");
+
 	if (functionXprime(lexemes, printer) || functionEprime(printer)) {
 		return true;
 	}
@@ -941,7 +732,8 @@ bool functionX2(std::list<Pair>& lexemes, printHelper printer) {
 
 
 bool functionXprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Xprime-> +A'X' | -A'X' | E'\n"); }
+	if (printer.print) printer.write("Xprime-> +A'X' | -A'X' | E'\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "+") {
@@ -970,18 +762,9 @@ bool functionXprime(std::list<Pair>&lexemes, printHelper printer) {
 	}
 }
 
-/*OLD FUNCTION
 bool functionAprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Aprime-> B' | B'A2\n"); }
-	if (functionBprime(lexemes, printer)) {
-		if (functionA2(lexemes, printer)) { return true; }
-		else { return true; }
-	}
-	return false;
-}*/
+	if (printer.print) printer.write("A' -> B'A'2\n");
 
-bool functionAprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("A' -> B'A'2\n"); }
 	if (functionBprime(lexemes, printer)) {
 		if (functionAprime2(lexemes, printer)) {
 			return true;
@@ -992,7 +775,8 @@ bool functionAprime(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionAprime2(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("A'2 --> A2 | E"); }
+	if (printer.print) printer.write("A'2 --> A2 | E");
+
 	if (functionA2(lexemes, printer) || functionEprime(printer)) {
 		return true;
 	}
@@ -1000,7 +784,8 @@ bool functionAprime2(std::list<Pair>& lexemes, printHelper printer) {
 
 
 bool functionA2(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("A2-> *B'A2 | /B'A2 | E'\n"); }
+	if (printer.print) printer.write("A2-> *B'A2 | /B'A2 | E'\n");
+
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "*") {
@@ -1026,7 +811,7 @@ bool functionA2(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionBprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Bprime -> -C' | C'\n"); }
+	if (printer.print) printer.write("Bprime -> -C' | C'\n");
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	if (token == "-") {
@@ -1041,9 +826,8 @@ bool functionBprime(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionCprime(std::list<Pair>&lexemes, printHelper printer) {
-	if (printer.print) { 
-		printer.write("Cprime-> G | D' | G[L] | (X) | F' | true | false\n"); 
-	}
+	if (printer.print) printer.write("Cprime-> G | D' | G[L] | (X) | F' | true | false\n");
+
 	Pair temp;
 	std::string token;
 	if (functionG(lexemes, printer)) {
@@ -1107,14 +891,12 @@ bool functionCprime(std::list<Pair>&lexemes, printHelper printer) {
 }
 
 bool functionEprime(printHelper printer) {
-	if (printer.print) { 
-		printer.write("Eprime -> epsilon\n"); 
-	}
+	if (printer.print) printer.write("Eprime -> epsilon\n"); 
 	return true;
 }
 
 bool functionDprime(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Dprime -> integer\n"); }
+	if (printer.print) printer.write("Dprime -> integer\n");
 
 	Pair temp = getPair(lexemes);
 	std::string currToken = getCurrentToken(lexemes);
@@ -1129,7 +911,7 @@ bool functionDprime(std::list<Pair>& lexemes, printHelper printer) {
 }
 
 bool functionFprime(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Fprime-> real\n"); }
+	if (printer.print) printer.write("Fprime-> real\n");
 	Pair temp = getPair(lexemes);
 	std::string currToken = getCurrentToken(lexemes);
 	std::string currType = temp.getType();
@@ -1145,7 +927,8 @@ bool functionFprime(std::list<Pair>& lexemes, printHelper printer) {
 
 /* Returns true if the current token is an identifier */
 bool functionG(std::list<Pair>& lexemes, printHelper printer) {
-	if (printer.print) { printer.write("Gprime-> identifier\n"); }
+	if (printer.print) printer.write("Gprime-> identifier\n");
+	
 	Pair temp = getPair(lexemes);
 	std::string token = getCurrentToken(lexemes);
 	std::string currType = temp.getType();
