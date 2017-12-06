@@ -4,7 +4,7 @@ integer low, high, step#xy;
 read(low, high, step#xy);
 while(low<high)
 	{
-	96.345 23.3333
+	345 12
 	write(low);
 	write(convert[low]);
 	low := low + step#xy;

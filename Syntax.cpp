@@ -707,6 +707,11 @@ bool functionZ(std::list<Pair>&lexemes, printHelper printer) {
 
 	if ((token == "=") || (token == "/=") || (token == ">")
 		|| (token == "<") || (token == "=>") || (token == "<=")) {
+		std::string instr = "EQU"; // default
+		if(token == ">") instr = "GRT";
+		if(token == "<") instr = "LES";
+		
+		instructions.addInstruction(instr, symbolTable.getAddress(token));
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
 		return true;
 	}
@@ -746,6 +751,8 @@ bool functionXprime(std::list<Pair>&lexemes, printHelper printer) {
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
 		if (functionAprime(lexemes, printer)) {
 			if (functionXprime(lexemes, printer)) { 
+				//symbolTable.addEntry(temp);
+				instructions.addInstruction("ADD", symbolTable.getAddress(token));
 				return true; 
 			}
 			else return false;
@@ -756,6 +763,8 @@ bool functionXprime(std::list<Pair>&lexemes, printHelper printer) {
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
 		if (functionAprime(lexemes, printer)) {
 			if (functionXprime(lexemes, printer)) { 
+				symbolTable.addEntry(temp);
+				instructions.addInstruction("SUB", symbolTable.getAddress(token));
 				return true; 
 			}
 			else return false;
@@ -797,7 +806,11 @@ bool functionA2(std::list<Pair>&lexemes, printHelper printer) {
 	if (token == "*") {
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
 		if (functionBprime(lexemes, printer)) {
-			if (functionA2(lexemes, printer)) { return true; }
+			if (functionA2(lexemes, printer)) { 
+					symbolTable.addEntry(temp);
+					instructions.addInstruction("MUL", symbolTable.getAddress(token));
+				return true; 
+			}
 			else { return false; }
 		}
 		else { return false; }
@@ -805,7 +818,11 @@ bool functionA2(std::list<Pair>&lexemes, printHelper printer) {
 	else if (token == "/") {
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
 		if (functionBprime(lexemes, printer)) {
-			if (functionA2(lexemes, printer)) { return true; }
+			if (functionA2(lexemes, printer)) { 
+				symbolTable.addEntry(temp);
+				instructions.addInstruction("DIV", symbolTable.getAddress(token));
+				return true; 
+			}
 			else { return false; }
 		}
 		else { return false; }
@@ -822,7 +839,11 @@ bool functionBprime(std::list<Pair>&lexemes, printHelper printer) {
 	std::string token = getCurrentToken(lexemes);
 	if (token == "-") {
 		printer.write("Token: " + temp.getType() + "\t Lexeme: " + temp.getToken() + "\n");
-		if (functionCprime(lexemes, printer)) { return true; }
+		if (functionCprime(lexemes, printer)) { 
+			symbolTable.addEntry(temp);
+			instructions.addInstruction("SUB", symbolTable.getAddress(token));
+			return true; 
+		}
 		else { return false; }
 	}
 	else {
@@ -905,9 +926,11 @@ bool functionDprime(std::list<Pair>& lexemes, printHelper printer) {
 	if (printer.print) printer.write("Dprime -> integer\n");
 
 	Pair temp = getPair(lexemes);
-	std::string currToken = getCurrentToken(lexemes);
-	std::string currType = temp.getType();
-	if (currType == "integer") {
+	std::string token = getCurrentToken(lexemes);
+	std::string type = temp.getType();
+	if (type == "integer") {
+		symbolTable.addEntry(temp);
+		instructions.addInstruction("PUSHM", symbolTable.getAddress(token));
 		return true;
 	}
 	else {
@@ -919,9 +942,11 @@ bool functionDprime(std::list<Pair>& lexemes, printHelper printer) {
 bool functionFprime(std::list<Pair>& lexemes, printHelper printer) {
 	if (printer.print) printer.write("Fprime-> real\n");
 	Pair temp = getPair(lexemes);
-	std::string currToken = getCurrentToken(lexemes);
-	std::string currType = temp.getType();
-	if (currType == "real") {
+	std::string token = getCurrentToken(lexemes);
+	std::string type = temp.getType();
+	if (type == "real") {
+		symbolTable.addEntry(temp);
+		instructions.addInstruction("PUSHI", symbolTable.getAddress(token));
 		return true;
 	}
 	else {

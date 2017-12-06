@@ -54,7 +54,7 @@ unsigned SymbolTable::getAddress(std::string lexeme) {
             return it.getAddress();
         }
     }
-    return -1;
+    return 0; //NIL value
 }
 
 /* Finds the lexeme at a given address, returns empty if not found */
