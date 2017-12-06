@@ -15,21 +15,25 @@
 #include "Pair.h"
 #include "Helpers.h"
 #include <iostream>
+#include <fstream>
 
 int line_count = 1;
 
 /* Writes to results file. Probably could be implemented better if time permits */
 void printHelper::write(std::string message) {
-	std::fstream fileWriter;
-	fileWriter.open(this->filename, std::ios::out | std::ios::app);
-	fileWriter << message;
-	fileWriter.close();
+	std::cout << "Printing to " << this->filename << "\n\n";
+	if (!message.empty()) {
+		std::fstream fileWriter;
+		fileWriter.open(this->filename, std::ios::out | std::ios::app);
+		fileWriter << message;
+		fileWriter.close();
+	}
 }
 
 void generateInstruction(std::string inst, printHelper printer) {
 	static std::string filename = "object-code.txt";
 	printer.filename = filename;
-	printer.write(inst);
+	return;
 }
 
 
@@ -83,6 +87,7 @@ bool functionA(std::list<Pair> lexemes, printHelper printer) {
 	std::string token;
 	Pair temp = getPair(lexemes);
 	if (printer.print) printer.write("A-> B %% CD\n");
+	std::cout << "test";
 
 	if (functionB(lexemes, printer)) {
 		token = getCurrentToken(lexemes);

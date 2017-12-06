@@ -1,8 +1,3 @@
-@ convert (fahr : integer)
-{
-	return 5*(fahr-32)/9;
-}
-
 %%
 integer low, high, step#xy;
 
@@ -14,18 +9,3 @@ while(low<high)
 	write(convert[low]);
 	low := low + step#xy;
 	}
-	<=
-
-	>=
-
-
-	this##shouldntwork
-
-	#neithershouldthis
-	33
-	true
-	.988
-	44..44
-	223.
-	33.3.31
-! @ # $ %$ ^ ^ & * mmm

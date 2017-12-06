@@ -6,7 +6,9 @@
 *           and functions to print output to a file
 *
 ******************************************************************************/
-
+#pragma once
+#ifndef __OCGENERATOR_H__
+#define __OCGENERATOR_H__ 
 #include "Syntax.h"
 #include <vector>
 
@@ -14,14 +16,15 @@
 /* If time permits, refactor Pair so it can replace Row */
 class Row {
 public:
-    Row(std::string, unsigned);
+    Row(Pair, unsigned);
     unsigned getAddress();
+    std::string getType();
     std::string getLexeme();
     void setAddress(unsigned);
     void setLexeme(std::string);
 
 private:
-    std::string lexeme_;
+    Pair tokenPair_;
     unsigned address_;
 };
 
@@ -30,7 +33,7 @@ public:
     SymbolTable();
 
     /* Adds adn entry to the table */
-    void addEntry(std::string);
+    void addEntry(Pair);
 
     /* Finds address of given lexeme, returns -1 if it could not be found */
     unsigned getAddress(std::string);
@@ -77,3 +80,5 @@ private:
     /* Pair should be refactored to be more general, but it'll fo for now */
     std::vector<Pair> instructions_;
 };
+
+#endif

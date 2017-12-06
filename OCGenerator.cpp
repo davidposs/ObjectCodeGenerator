@@ -13,23 +13,27 @@
 /*****************************************************************************/
 
 /* Row constructor */
-Row::Row(std::string lex, unsigned addr)
-    :lexeme_(lex), address_(addr) {}
+Row::Row(Pair tokenPair, unsigned addr)
+    :tokenPair_(tokenPair), address_(addr) {}
 
 unsigned Row::getAddress() {
     return address_;
 }
 
 std::string Row::getLexeme() {
-    return lexeme_;
+    return tokenPair_.getToken();
+}
+
+std::string Row::getType() {
+    return tokenPair_.getType();
 }
 
 void Row::setAddress(unsigned addr) {
     address_ = addr;
 }
 
-void Row::setLexeme(std::string lex) {
-    lexeme_ = lex;
+void Row::setLexeme(std::string newToken) {
+    tokenPair_.setToken(newToken);
 }
 
 /*****************************************************************************/
@@ -37,8 +41,8 @@ void Row::setLexeme(std::string lex) {
 /*****************************************************************************/
 SymbolTable::SymbolTable(): currentAddress_(10000) {}
 
-void SymbolTable::addEntry(std::string lexeme) {
-    table_.push_back(Row(lexeme, currentAddress_++));    
+void SymbolTable::addEntry(Pair newPair) {
+    table_.push_back(Row(newPair, currentAddress_++));    
 }
 
 /* Finds the address of a lexeme if it is in the table, returns -1 otherwise */
@@ -94,7 +98,8 @@ void SymbolTable::printIdentifiers(std::string filename) {
     std::fstream output;
     output.open(filename, std::ios::out | std::ios::app);
     for (auto& it : table_) {
-        output << it.getLexeme() << "\n";
+        output << it.getAddress() << "\t" << it.getLexeme() 
+            << "\t" << it.getType() << "\n";
     }
 }
 

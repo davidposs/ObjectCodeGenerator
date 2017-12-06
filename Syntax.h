@@ -13,7 +13,6 @@
 
 #include <list>
 #include "Pair.h"
-#include "OCGenerator.h"
 
 /* Handles whether or not the functions will print their results to a file
    as well as the file they get printed to */

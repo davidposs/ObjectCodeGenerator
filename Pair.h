@@ -18,6 +18,8 @@ public:
 	Pair(std::string l, std::string t);
 	std::string getToken();
 	std::string getType();
+	void setToken(std::string);
+	void setType(std::string);
 	friend std::ostream& operator<<(std::ostream& os, Pair P);
 private:
 	std::string token, type;
