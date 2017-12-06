@@ -940,6 +940,7 @@ bool functionG(std::list<Pair>& lexemes, printHelper printer) {
 	std::string currType = temp.getType();
 	if (currType == "identifier") {
 		symbolTable.addEntry(temp);
+		instructions.addInstruction("POPM", symbolTable.getAddress(token));
 		return true;
 	}
 	else {

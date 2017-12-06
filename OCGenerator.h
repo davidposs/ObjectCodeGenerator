@@ -65,14 +65,14 @@ class Instructions {
 public:
     Instructions();
 
-    /* Adds an instruction to list */
-    void addInstruction(std::string);
+    /* Adds an instruction and operand(address) to list */
+    void addInstruction(std::string, unsigned);
 
     /* Prints all instructions without number to a specified file */
     void printInstructions(std::string filename);
 
     /* Used to allow array-like indexing to retrieve an instruction */
-    std::string operator[](unsigned index);
+    Pair operator[](unsigned index);
 
 private:
     /* Current count of how many instructions there are. Incremented every time
@@ -80,7 +80,9 @@ private:
     unsigned numInstructions_;
 
     /* Pair should be refactored to be more general, but it'll fo for now */
-    std::vector<Pair> instructions_;
+    std::vector<Row> instructions_;
 };
+
+extern Instructions instructions;
 
 #endif

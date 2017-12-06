@@ -30,8 +30,10 @@ int main() {
 			printer.filename = "output-syntax.txt";
 			functionA(lexer.getLexemes(), printer);
 			lexer.printLexemes(converToOutputName(input));
-			std::cout << "printing identifiers";
+			std::cout << "printing identifiers\n";
 			symbolTable.printIdentifiers("identifiers.txt");
+			std::cout << "Printing Instructions\n";
+			instructions.printInstructions("instructions.txt");
 		}
 		std::cin.clear();
 		keepGoing = false;

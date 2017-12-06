@@ -111,11 +111,17 @@ void SymbolTable::printIdentifiers(std::string filename) {
 /*****************************************************************************/
 /************************** Instructions Functions ***************************/
 /*****************************************************************************/
+Instructions instructions;
 
 Instructions::Instructions(): numInstructions_(0) {}
 
-void Instructions::addInstruction(std::string instr) {
-    instructions_.push_back(Pair(std::to_string(++numInstructions_), instr));
+void Instructions::addInstruction(std::string instr, unsigned operand) {
+    /* Convert the instruction and operand to a pair, then add instruction #
+    to a row and insert to instructions */
+    Row newRow(Pair(instr, std::to_string(operand)), 0);
+    unsigned newInstr = this->numInstructions_;
+    newRow.setAddress(++newInstr);
+    instructions_.push_back(newRow);
 }
 
 /* TODO: change Pair to be more ambiguous. Initially it was designed to hold
@@ -125,16 +131,16 @@ void Instructions::printInstructions(std::string filename) {
     std::fstream output;
     output.open(filename, std::ios::out | std::ios::app);
     for (auto& it : instructions_) {
-        output << it.getType() << std::endl;
+        output << it.getLexeme() << "\t" << it.getType() << std::endl;
     }
 }
 
 /* Overload [] operator for array-like indexing of Instructions list */
-std::string Instructions::operator[](unsigned index) {
+Pair Instructions::operator[](unsigned index) {
     for (auto& it: instructions_) {
-        if (it.getToken() == std::to_string(index)) {
-            return it.getType(); // type refers to instruction
+        if (it.getLexeme() == std::to_string(index)) {
+            return Pair(it.getLexeme(), it.getType()); // type refers to instruction
         }
     }
-    return "";
+    return Pair();
 }
