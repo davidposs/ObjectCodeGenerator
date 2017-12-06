@@ -39,6 +39,8 @@ void Row::setLexeme(std::string newToken) {
 /*****************************************************************************/
 /************************** Symbol Table Functions ***************************/
 /*****************************************************************************/
+SymbolTable symbolTable;
+
 SymbolTable::SymbolTable(): currentAddress_(10000) {}
 
 void SymbolTable::addEntry(Pair newPair) {
@@ -97,9 +99,11 @@ void SymbolTable::updateSymbol(std::string lex, std::string newSymbol) {
 void SymbolTable::printIdentifiers(std::string filename) {
     std::fstream output;
     output.open(filename, std::ios::out | std::ios::app);
+    output << "Address\t\tName\t\tType\n";
+    output << "------------------------------------------\n";
     for (auto& it : table_) {
-        output << it.getAddress() << "\t" << it.getLexeme() 
-            << "\t" << it.getType() << "\n";
+        output << it.getAddress() << "\t\t" << it.getLexeme() 
+            << "\t\t" << it.getType() << "\n";
     }
 }
 

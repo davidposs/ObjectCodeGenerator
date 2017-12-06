@@ -14,6 +14,8 @@
 #include "Syntax.h"
 #include "Pair.h"
 #include "Helpers.h"
+#include "globals.h"
+#include "OCGenerator.h"
 #include <iostream>
 #include <fstream>
 
@@ -47,8 +49,7 @@ std::string getCurrentToken(std::list<Pair>& lexemes) {
 	if (lexemes.size() == 0) return "";
 
 	std::string token = lexemes.front().getToken();
-	while (token == "\\n" || token == "\\t")
-	{
+	while (token == "\\n" || token == "\\t") {
 		if (token == "\\n") line_count++;
 
 		lexemes.pop_front();
@@ -938,6 +939,7 @@ bool functionG(std::list<Pair>& lexemes, printHelper printer) {
 	std::string token = getCurrentToken(lexemes);
 	std::string currType = temp.getType();
 	if (currType == "identifier") {
+		symbolTable.addEntry(temp);
 		return true;
 	}
 	else {

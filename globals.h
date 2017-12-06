@@ -14,6 +14,7 @@
 #define _GLOBALS_H_
 #include <string>
 
+
 enum TokenType {
 	Integer = 1,
 	Real = 2,

@@ -59,6 +59,8 @@ private:
     std::vector<Row> table_;
 };
 
+extern SymbolTable symbolTable;
+
 class Instructions {
 public:
     Instructions();

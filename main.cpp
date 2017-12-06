@@ -13,9 +13,12 @@
 #include "Helpers.h"
 #include "Lexer.h"
 #include "Syntax.h"
+#include "OCGenerator.h"
+#include "globals.h"
 #include <iostream>
 
 int main() {
+	
 	std::string input = "sample.txt";
 	bool keepGoing = true;
 	while (keepGoing) {
@@ -27,6 +30,8 @@ int main() {
 			printer.filename = "output-syntax.txt";
 			functionA(lexer.getLexemes(), printer);
 			lexer.printLexemes(converToOutputName(input));
+			std::cout << "printing identifiers";
+			symbolTable.printIdentifiers("identifiers.txt");
 		}
 		std::cin.clear();
 		keepGoing = false;
